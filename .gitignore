@@ -1,0 +1,96 @@
+# ------------------------
+# Node Modules
+# ------------------------
+node_modules/
+**/node_modules/
+
+# ------------------------
+# Environment Variables
+# ------------------------
+# Only ignore environment files that contain secrets. Keep project files tracked.
+# Ignore the top-level .env and any per-service .env files (client/server).
+.env
+client/.env
+server/.env
+# Local env variants
+.env.local
+.env.development.local
+.env.production.local
+.env.test.local
+
+# ------------------------
+# Build Output
+# ------------------------
+dist/
+build/
+.out/
+.next/
+.next/*
+.vercel/
+tmp/
+temp/
+
+# React/Vite Build
+client/dist/
+client/build/
+client/.vite/
+
+# Server Build
+server/dist/
+server/build/
+
+# ------------------------
+# Logs
+# ------------------------
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+logs/
+*.log
+
+# ------------------------
+# OS Files
+# ------------------------
+.DS_Store
+Thumbs.db
+
+# ------------------------
+# IDE / Editor
+# ------------------------
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# ------------------------
+# Cache Files
+# ------------------------
+.cache/
+*.cache
+client/.cache/
+server/.cache/
+
+# ------------------------
+# Firebase / Cloud
+# ------------------------
+.firebase/
+.firebaserc
+functions/node_modules/
+
+# ------------------------
+# Local Environment
+# ------------------------
+.env.local
+.env.development.local
+.env.production.local
+.env.test.local
+
+# ------------------------
+# Misc
+# ------------------------
+*.pem
+*.key
+*.cert
