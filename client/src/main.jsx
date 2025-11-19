@@ -13,6 +13,8 @@ import BuyerDashboard from "./pages/BuyerDashboard.jsx";
 import ProductDetailPage from "./pages/ProductDetailPage.jsx";
 import CartPage from "./pages/CartPage.jsx";
 import AdminDashboard from "./pages/AdminDashboard.jsx";
+import "./index.css";
+import "./App.css";
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth, useUser } from "@clerk/clerk-react";
+import { formatINR } from "../utils/formatCurrency";
 import { useParams, useNavigate, Link } from "react-router-dom";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
@@ -17,17 +18,11 @@ export default function ProductDetailPage() {
   const [cartMessage, setCartMessage] = useState("");
   const [purchaseMessage, setPurchaseMessage] = useState("");
 
-  // Fetch product details
   useEffect(() => {
     const fetchProduct = async () => {
       try {
         setLoading(true);
-        const token = await getToken();
-        const response = await fetch(`${API_URL}/api/buyer/products/${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await fetch(`${API_URL}/api/buyer/products/${id}`);
         const data = await response.json();
 
         if (data.success) {
@@ -43,521 +38,277 @@ export default function ProductDetailPage() {
       }
     };
 
-    if (id) {
-      fetchProduct();
+    if (id) fetchProduct();
+  }, [id]);
+
+  const handleAddToCart = () => {
+    if (!isSignedIn) return navigate("/buyer/sign-in");
+
+    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    const existing = cart.find((item) => item.id === product.id);
+
+    if (existing) {
+      existing.quantity += quantity;
+    } else {
+      cart.push({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image_url: product.image_url,
+        quantity,
+      });
     }
-  }, [id, getToken]);
 
-  // Handle add to cart
-  const handleAddToCart = async () => {
-    if (!isSignedIn) {
-      navigate("/buyer/sign-in");
-      return;
-    }
+    localStorage.setItem("cart", JSON.stringify(cart));
 
-    try {
-      // In a real app, this would connect to a cart API
-      // For now, we'll use localStorage to simulate cart functionality
-      const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-      const existingItem = cart.find((item) => item.id === product.id);
-
-      if (existingItem) {
-        existingItem.quantity += quantity;
-      } else {
-        cart.push({
-          id: product.id,
-          name: product.name,
-          price: product.price,
-          image_url: product.image_url,
-          quantity: quantity,
-        });
-      }
-
-      localStorage.setItem("cart", JSON.stringify(cart));
-
-      setCartMessage("Product added to cart!");
-      setTimeout(() => setCartMessage(""), 3000);
-    } catch (err) {
-      console.error("Error adding to cart:", err);
-      setCartMessage("Failed to add product to cart");
-    }
+    setCartMessage("Product added to cart!");
+    setTimeout(() => setCartMessage(""), 2500);
   };
 
-  // Handle buy now
-  const handleBuyNow = async () => {
-    if (!isSignedIn) {
-      navigate("/buyer/sign-in");
-      return;
-    }
+  const handleBuyNow = () => {
+    if (!isSignedIn) return navigate("/buyer/sign-in");
 
-    try {
-      // In a real app, this would connect to a payment API
-      setPurchaseMessage("Redirecting to checkout...");
+    setPurchaseMessage("Redirecting to checkout...");
 
-      // Simulate checkout process
-      setTimeout(() => {
-        setPurchaseMessage("Purchase successful! Redirecting to orders...");
-        setTimeout(() => {
-          navigate("/buyer/dashboard");
-        }, 2000);
-      }, 1500);
-    } catch (err) {
-      console.error("Error processing purchase:", err);
-      setPurchaseMessage("Failed to process purchase");
-    }
+    setTimeout(() => {
+      setPurchaseMessage("Purchase successful! Redirecting...");
+      setTimeout(() => navigate("/buyer/dashboard"), 2000);
+    }, 1500);
   };
 
-  if (loading) {
+  if (loading)
     return (
-      <div
-        style={{
-          minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <p>Loading product details...</p>
+      <div className="min-h-screen flex items-center justify-center text-white">
+        <p className="animate-pulse">Loading product...</p>
       </div>
     );
-  }
 
-  if (error) {
+  if (error)
     return (
-      <div
-        style={{
-          minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <div style={{ textAlign: "center" }}>
-          <h2>Error</h2>
-          <p>{error}</p>
+      <div className="min-h-screen flex items-center justify-center text-white">
+        <div className="text-center bg-white/10 backdrop-blur-xl p-10 rounded-2xl border border-white/20 shadow-xl">
+          <h2 className="text-3xl font-bold">Error</h2>
+          <p className="opacity-80">{error}</p>
           <Link
+            className="text-purple-300 mt-4 block hover:underline"
             to="/buyer/dashboard"
-            style={{ color: "#10B981", textDecoration: "none" }}
           >
             ← Back to Products
           </Link>
         </div>
       </div>
     );
-  }
 
-  if (!product) {
+  if (!product)
     return (
-      <div
-        style={{
-          minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <div style={{ textAlign: "center" }}>
-          <h2>Product Not Found</h2>
-          <p>
-            The product you're looking for doesn't exist or has been removed.
-          </p>
+      <div className="min-h-screen flex items-center justify-center text-white">
+        <div className="text-center bg-white/10 backdrop-blur-xl p-10 rounded-2xl border border-white/20 shadow-xl">
+          <h2 className="text-3xl font-bold">Product Not Found</h2>
+          <p className="opacity-80">This product may have been removed.</p>
           <Link
+            className="text-purple-300 mt-4 block hover:underline"
             to="/buyer/dashboard"
-            style={{ color: "#10B981", textDecoration: "none" }}
           >
             ← Back to Products
           </Link>
         </div>
       </div>
     );
-  }
 
   return (
-    <div style={{ minHeight: "100vh", backgroundColor: "#f5f5f5" }}>
-      {/* Navigation Header */}
-      <header
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 1000,
-          padding: "1rem 2rem",
-          backgroundColor: "white",
-          boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "2rem" }}>
-          <h1 style={{ margin: 0, fontSize: "1.5rem", color: "#10B981" }}>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-indigo-900 text-white">
+      {/* NAVBAR */}
+      <header className="fixed top-0 left-0 right-0 z-50 px-6 py-4 bg-white/10 backdrop-blur-xl border-b border-white/20 shadow-lg flex justify-between items-center">
+        <div className="flex items-center gap-6">
+          <h1 className="text-3xl font-bold text-purple-300 drop-shadow-md">
             🛒 Product Details
           </h1>
-          <nav style={{ display: "flex", gap: "1rem" }}>
+
+          <nav className="flex gap-4">
             <Link
               to="/buyer/dashboard"
-              style={{
-                padding: "0.5rem 1rem",
-                color: "#666",
-                textDecoration: "none",
-                borderRadius: "6px",
-                fontWeight: "500",
-              }}
+              className="px-4 py-2 bg-white/10 rounded-lg hover:bg-white/20 transition"
             >
-              ← Back to Products
+              ← Back
             </Link>
+
             <Link
               to="/cart"
-              style={{
-                padding: "0.5rem 1rem",
-                color: "#10B981",
-                textDecoration: "none",
-                borderRadius: "6px",
-                fontWeight: "500",
-              }}
+              className="px-4 py-2 bg-purple-600/40 rounded-lg hover:bg-purple-600/60 transition"
             >
               🛒 Cart
             </Link>
           </nav>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          <span style={{ color: "#666", fontSize: "0.9rem" }}>
-            {user?.primaryEmailAddress?.emailAddress}
-          </span>
+
+        <div className="opacity-80 text-sm">
+          {user?.primaryEmailAddress?.emailAddress}
         </div>
       </header>
 
-      {/* Main Content */}
-      <div
-        style={{
-          padding: "6rem 2rem 2rem 2rem",
-          maxWidth: "1200px",
-          margin: "0 auto",
-        }}
-      >
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "2rem",
-            backgroundColor: "white",
-            borderRadius: "8px",
-            padding: "2rem",
-            boxShadow: "0 4px 6px rgba(0,0,0,0.05)",
-          }}
-        >
-          {/* Product Image Section */}
+      {/* PRODUCT CONTENT */}
+      <div className="pt-28 px-6 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 bg-white/10 backdrop-blur-xl border border-white/20 shadow-xl rounded-2xl p-8 animate-fadeInSlow">
+          {/* PRODUCT IMAGE */}
           <div>
             {product.image_url ? (
               product.image_url.match(/\.(mp4|mov|webm|mpeg)$/i) ? (
                 <video
                   src={`${API_URL}${product.image_url}`}
                   controls
-                  style={{
-                    width: "100%",
-                    height: "400px",
-                    objectFit: "cover",
-                    borderRadius: "8px",
-                    backgroundColor: "#000",
-                  }}
+                  className="w-full h-[420px] object-cover rounded-xl shadow-lg"
                 />
               ) : (
                 <img
                   src={`${API_URL}${product.image_url}`}
+                  className="w-full h-[420px] object-cover rounded-xl shadow-lg"
                   alt={product.name}
-                  style={{
-                    width: "100%",
-                    height: "400px",
-                    objectFit: "cover",
-                    borderRadius: "8px",
-                  }}
                 />
               )
             ) : (
-              <div
-                style={{
-                  width: "100%",
-                  height: "400px",
-                  backgroundColor: "#f3f4f6",
-                  borderRadius: "8px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "#9ca3af",
-                  fontSize: "4rem",
-                }}
-              >
+              <div className="w-full h-[420px] bg-white/10 rounded-xl flex items-center justify-center text-6xl">
                 📦
               </div>
             )}
           </div>
 
-          {/* Product Details Section */}
+          {/* DETAILS */}
           <div>
-            <h1
-              style={{ fontSize: "2rem", color: "#333", margin: "0 0 1rem 0" }}
-            >
+            <h1 className="text-4xl font-bold mb-4 drop-shadow">
               {product.name}
             </h1>
 
-            <p
-              style={{
-                color: "#666",
-                fontSize: "1rem",
-                lineHeight: "1.6",
-                marginBottom: "1.5rem",
-              }}
-            >
-              {product.description ||
-                "No description available for this product."}
+            <p className="opacity-90 text-lg leading-relaxed mb-6">
+              {product.description || "No description available."}
             </p>
 
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: "1.5rem",
-                padding: "1rem",
-                backgroundColor: "#f9fafb",
-                borderRadius: "6px",
-              }}
-            >
+            {/* PRICE + STOCK */}
+            <div className="bg-white/10 backdrop-blur-lg rounded-xl p-5 border border-white/20 shadow-lg flex justify-between">
               <div>
-                <p
-                  style={{
-                    margin: "0 0 0.5rem 0",
-                    fontSize: "0.9rem",
-                    color: "#666",
-                  }}
-                >
-                  Price
-                </p>
-                <p
-                  style={{
-                    margin: 0,
-                    fontSize: "1.75rem",
-                    fontWeight: "bold",
-                    color: "#10B981",
-                  }}
-                >
-                  ${parseFloat(product.price).toFixed(2)}
+                <p className="text-sm opacity-70">Price</p>
+                <p className="text-3xl font-bold text-purple-300 drop-shadow">
+                  {formatINR(product.price)}
                 </p>
               </div>
 
               <div>
+                <p className="text-sm opacity-70">Availability</p>
                 <p
-                  style={{
-                    margin: "0 0 0.5rem 0",
-                    fontSize: "0.9rem",
-                    color: "#666",
-                  }}
-                >
-                  Availability
-                </p>
-                <p
-                  style={{
-                    margin: 0,
-                    fontSize: "1rem",
-                    fontWeight: "500",
-                    color: product.stock > 0 ? "#10B981" : "#EF4444",
-                  }}
+                  className={`font-bold ${
+                    product.stock > 0 ? "text-green-300" : "text-red-300"
+                  }`}
                 >
                   {product.stock > 0
                     ? `${product.stock} in stock`
-                    : "Out of stock"}
+                    : "Out of Stock"}
                 </p>
               </div>
             </div>
 
-            {/* Quantity Selector */}
-            <div style={{ marginBottom: "1.5rem" }}>
-              <label
-                style={{
-                  display: "block",
-                  marginBottom: "0.5rem",
-                  fontWeight: "500",
-                  color: "#374151",
-                }}
-              >
-                Quantity
-              </label>
-              <div
-                style={{ display: "flex", alignItems: "center", gap: "1rem" }}
-              >
+            {/* QUANTITY */}
+            <div className="mt-6">
+              <p className="font-semibold mb-2 opacity-90">Quantity</p>
+
+              <div className="flex items-center gap-4">
                 <button
+                  className="w-10 h-10 bg-white/20 rounded-lg hover:bg-white/30 transition"
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
                   disabled={quantity <= 1}
-                  style={{
-                    width: "40px",
-                    height: "40px",
-                    backgroundColor: "#e5e7eb",
-                    border: "none",
-                    borderRadius: "6px",
-                    fontSize: "1.25rem",
-                    cursor: quantity > 1 ? "pointer" : "not-allowed",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
                 >
                   -
                 </button>
-                <span
-                  style={{
-                    minWidth: "40px",
-                    textAlign: "center",
-                    fontSize: "1.125rem",
-                    fontWeight: "500",
-                  }}
-                >
-                  {quantity}
-                </span>
+
+                <span className="text-xl font-bold">{quantity}</span>
+
                 <button
+                  className="w-10 h-10 bg-white/20 rounded-lg hover:bg-white/30 transition"
                   onClick={() =>
-                    setQuantity(Math.min(product.stock || 10, quantity + 1))
+                    setQuantity(Math.min(product.stock, quantity + 1))
                   }
-                  disabled={product.stock > 0 && quantity >= product.stock}
-                  style={{
-                    width: "40px",
-                    height: "40px",
-                    backgroundColor: "#e5e7eb",
-                    border: "none",
-                    borderRadius: "6px",
-                    fontSize: "1.25rem",
-                    cursor:
-                      product.stock > 0 && quantity < product.stock
-                        ? "pointer"
-                        : "not-allowed",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
+                  disabled={quantity >= product.stock}
                 >
                   +
                 </button>
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div style={{ display: "flex", gap: "1rem", marginBottom: "1rem" }}>
+            {/* BUTTONS */}
+            <div className="grid grid-cols-2 gap-4 mt-8">
               <button
+                className={`
+                  py-3 rounded-lg font-semibold shadow-lg transition
+                  ${
+                    product.stock > 0
+                      ? "bg-purple-600 hover:bg-purple-700 hover:scale-105"
+                      : "bg-gray-600 cursor-not-allowed"
+                  }
+                `}
                 onClick={handleAddToCart}
-                disabled={product.stock === 0}
-                style={{
-                  flex: 1,
-                  padding: "1rem",
-                  backgroundColor: product.stock > 0 ? "#3B82F6" : "#9ca3af",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "6px",
-                  cursor: product.stock > 0 ? "pointer" : "not-allowed",
-                  fontWeight: "500",
-                  fontSize: "1rem",
-                }}
               >
                 🛒 Add to Cart
               </button>
+
               <button
+                className={`
+                  py-3 rounded-lg font-semibold shadow-lg transition
+                  ${
+                    product.stock > 0
+                      ? "bg-green-600 hover:bg-green-700 hover:scale-105"
+                      : "bg-gray-600 cursor-not-allowed"
+                  }
+                `}
                 onClick={handleBuyNow}
-                disabled={product.stock === 0}
-                style={{
-                  flex: 1,
-                  padding: "1rem",
-                  backgroundColor: product.stock > 0 ? "#10B981" : "#9ca3af",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "6px",
-                  cursor: product.stock > 0 ? "pointer" : "not-allowed",
-                  fontWeight: "500",
-                  fontSize: "1rem",
-                }}
               >
                 💳 Buy Now
               </button>
             </div>
 
-            {/* Messages */}
+            {/* MESSAGES */}
             {cartMessage && (
-              <p
-                style={{
-                  textAlign: "center",
-                  color: cartMessage.includes("Failed") ? "#EF4444" : "#10B981",
-                  marginBottom: "1rem",
-                }}
-              >
-                {cartMessage}
-              </p>
+              <p className="text-green-300 text-center mt-4">{cartMessage}</p>
             )}
+
             {purchaseMessage && (
-              <p
-                style={{
-                  textAlign: "center",
-                  color: purchaseMessage.includes("Failed")
-                    ? "#EF4444"
-                    : "#10B981",
-                  marginBottom: "1rem",
-                }}
-              >
+              <p className="text-purple-300 text-center mt-4">
                 {purchaseMessage}
               </p>
             )}
 
-            {/* Seller Information */}
-            <div
-              style={{
-                marginTop: "2rem",
-                padding: "1rem",
-                backgroundColor: "#f9fafb",
-                borderRadius: "6px",
-              }}
-            >
-              <h3
-                style={{
-                  margin: "0 0 1rem 0",
-                  fontSize: "1.125rem",
-                  color: "#333",
-                }}
-              >
-                Seller Information
-              </h3>
-              <div
-                style={{ display: "flex", alignItems: "center", gap: "1rem" }}
-              >
-                <div
-                  style={{
-                    width: "50px",
-                    height: "50px",
-                    borderRadius: "50%",
-                    backgroundColor: "#e5e7eb",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: "1.5rem",
-                  }}
-                >
+            {/* SELLER INFO */}
+            <div className="bg-white/10 border border-white/20 rounded-xl p-4 mt-10 backdrop-blur-lg shadow-lg">
+              <h3 className="text-xl font-semibold mb-3">Seller Information</h3>
+
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-2xl">
                   🏪
                 </div>
+
                 <div>
-                  <p style={{ margin: "0 0 0.25rem 0", fontWeight: "500" }}>
-                    {product.seller_name && product.seller_name.trim()
-                      ? `Seller: ${product.seller_name}`
-                      : product.seller_email
-                      ? `Seller: ${product.seller_email}`
-                      : product.seller_id
-                      ? `Seller ID: ${product.seller_id.substring(0, 10)}...`
-                      : "Unknown Seller"}
+                  <p className="font-semibold">
+                    {product.seller_name ||
+                      product.seller_email ||
+                      `Seller ID: ${product.seller_id?.slice(0, 10)}...`}
                   </p>
-                  <p style={{ margin: 0, fontSize: "0.875rem", color: "#666" }}>
-                    Verified Seller
-                  </p>
+                  <p className="text-sm opacity-80">Verified Seller</p>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* ANIMATIONS */}
+      <style>
+        {`
+          @keyframes fadeInSlow {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          .animate-fadeInSlow {
+            animation: fadeInSlow 1s ease-out forwards;
+          }
+        `}
+      </style>
     </div>
   );
 }

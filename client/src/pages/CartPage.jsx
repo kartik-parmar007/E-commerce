@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
+import { formatINR } from "../utils/formatCurrency";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -11,272 +12,198 @@ export default function CartPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Load cart from localStorage
     const cart = JSON.parse(localStorage.getItem("cart") || "[]");
     setCartItems(cart);
     setLoading(false);
   }, []);
 
   const updateQuantity = (id, newQuantity) => {
-    if (newQuantity <= 0) {
-      removeFromCart(id);
-      return;
-    }
+    if (newQuantity <= 0) return removeFromCart(id);
 
-    const updatedCart = cartItems.map(item => 
+    const updatedCart = cartItems.map((item) =>
       item.id === id ? { ...item, quantity: newQuantity } : item
     );
-    
+
     setCartItems(updatedCart);
     localStorage.setItem("cart", JSON.stringify(updatedCart));
   };
 
   const removeFromCart = (id) => {
-    const updatedCart = cartItems.filter(item => item.id !== id);
+    const updatedCart = cartItems.filter((item) => item.id !== id);
     setCartItems(updatedCart);
     localStorage.setItem("cart", JSON.stringify(updatedCart));
   };
 
   const getTotalPrice = () => {
-    return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+    return cartItems.reduce(
+      (total, item) => total + item.price * item.quantity,
+      0
+    );
   };
 
   const handleCheckout = () => {
-    // In a real app, this would connect to a payment API
-    alert("Checkout functionality would be implemented here!");
-    // Clear cart after checkout
+    alert("Checkout functionality will be implemented here!");
     setCartItems([]);
     localStorage.setItem("cart", JSON.stringify([]));
   };
 
   if (loading) {
     return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <p>Loading cart...</p>
+      <div className="min-h-screen flex items-center justify-center text-white">
+        <p className="animate-pulse">Loading cart...</p>
       </div>
     );
   }
 
   return (
-    <div style={{ minHeight: "100vh", backgroundColor: "#f5f5f5" }}>
-      {/* Navigation Header */}
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-indigo-900 text-white">
+      {/* NAVBAR */}
       <header
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 1000,
-          padding: "1rem 2rem",
-          backgroundColor: "white",
-          boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
+        className="fixed top-0 left-0 right-0 z-50 px-6 py-4
+        backdrop-blur-xl bg-white/10 border-b border-white/20 shadow-lg flex justify-between items-center"
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "2rem" }}>
-          <h1 style={{ margin: 0, fontSize: "1.5rem", color: "#10B981" }}>
+        <div className="flex items-center gap-6">
+          <h1 className="text-3xl font-bold text-purple-300 drop-shadow-md">
             🛒 Your Cart
           </h1>
-          <nav style={{ display: "flex", gap: "1rem" }}>
-            <Link
-              to="/buyer/dashboard"
-              style={{
-                padding: "0.5rem 1rem",
-                color: "#666",
-                textDecoration: "none",
-                borderRadius: "6px",
-                fontWeight: "500",
-              }}
-            >
-              ← Continue Shopping
-            </Link>
-          </nav>
+
+          <Link
+            to="/buyer/dashboard"
+            className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition"
+          >
+            ← Continue Shopping
+          </Link>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          <span style={{ color: "#666", fontSize: "0.9rem" }}>
+
+        <div className="flex items-center gap-3">
+          <span className="text-sm opacity-80">
             {user?.primaryEmailAddress?.emailAddress}
           </span>
         </div>
       </header>
 
-      {/* Main Content */}
-      <div style={{ padding: "6rem 2rem 2rem 2rem", maxWidth: "1200px", margin: "0 auto" }}>
-        <h2 style={{ marginBottom: "1.5rem" }}>Shopping Cart ({cartItems.length} items)</h2>
+      {/* MAIN BODY */}
+      <div className="pt-28 px-6 max-w-6xl mx-auto">
+        <h2 className="text-3xl font-bold mb-6 drop-shadow-md">
+          Shopping Cart ({cartItems.length} items)
+        </h2>
 
         {cartItems.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "3rem", backgroundColor: "white", borderRadius: "8px" }}>
-            <h3>Your cart is empty</h3>
-            <p style={{ color: "#666", marginBottom: "1.5rem" }}>Add some products to your cart!</p>
+          <div className="text-center p-10 bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 shadow-lg animate-fadeInSlow">
+            <h3 className="text-2xl font-semibold mb-2">Your cart is empty</h3>
+            <p className="opacity-80 mb-4">Add some products to your cart!</p>
+
             <Link
               to="/buyer/dashboard"
-              style={{
-                padding: "0.75rem 1.5rem",
-                backgroundColor: "#10B981",
-                color: "white",
-                textDecoration: "none",
-                borderRadius: "6px",
-                fontWeight: "500",
-              }}
+              className="px-6 py-3 bg-purple-600 hover:bg-purple-700 rounded-lg font-semibold shadow-lg hover:scale-105 transition"
             >
               Browse Products
             </Link>
           </div>
         ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "2rem" }}>
-            {/* Cart Items */}
-            <div style={{ backgroundColor: "white", borderRadius: "8px", padding: "1.5rem" }}>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* CART ITEMS */}
+            <div className="lg:col-span-2 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 shadow-lg animate-fadeInSlow">
               {cartItems.map((item) => (
-                <div 
+                <div
                   key={item.id}
-                  style={{ 
-                    display: "flex", 
-                    gap: "1.5rem", 
-                    padding: "1rem 0",
-                    borderBottom: "1px solid #e5e7eb"
-                  }}
+                  className="flex gap-4 py-5 border-b border-white/20"
                 >
+                  {/* IMAGE */}
                   {item.image_url ? (
                     <img
                       src={`${API_URL}${item.image_url}`}
                       alt={item.name}
-                      style={{
-                        width: "100px",
-                        height: "100px",
-                        objectFit: "cover",
-                        borderRadius: "6px",
-                      }}
+                      className="w-28 h-28 object-cover rounded-xl"
                     />
                   ) : (
-                    <div
-                      style={{
-                        width: "100px",
-                        height: "100px",
-                        backgroundColor: "#f3f4f6",
-                        borderRadius: "6px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: "1.5rem",
-                      }}
-                    >
+                    <div className="w-28 h-28 bg-white/10 rounded-xl flex items-center justify-center text-4xl">
                       📦
                     </div>
                   )}
 
-                  <div style={{ flex: 1 }}>
-                    <h3 style={{ margin: "0 0 0.5rem 0" }}>{item.name}</h3>
-                    <p style={{ color: "#10B981", fontWeight: "bold", margin: "0 0 1rem 0" }}>
-                      ${parseFloat(item.price).toFixed(2)}
+                  {/* DETAILS */}
+                  <div className="flex-1">
+                    <h3 className="text-xl font-semibold">{item.name}</h3>
+                    <p className="text-purple-300 font-bold">
+                      {formatINR(item.price)}
                     </p>
 
-                    <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                    {/* QUANTITY */}
+                    <div className="flex items-center gap-4 mt-3">
+                      <div className="flex items-center gap-2">
                         <button
-                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                          style={{
-                            width: "30px",
-                            height: "30px",
-                            backgroundColor: "#e5e7eb",
-                            border: "none",
-                            borderRadius: "4px",
-                            fontSize: "1rem",
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                          }}
+                          onClick={() =>
+                            updateQuantity(item.id, item.quantity - 1)
+                          }
+                          className="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-md shadow flex justify-center items-center"
                         >
                           -
                         </button>
-                        <span>{item.quantity}</span>
+
+                        <span className="text-lg">{item.quantity}</span>
+
                         <button
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                          style={{
-                            width: "30px",
-                            height: "30px",
-                            backgroundColor: "#e5e7eb",
-                            border: "none",
-                            borderRadius: "4px",
-                            fontSize: "1rem",
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                          }}
+                          onClick={() =>
+                            updateQuantity(item.id, item.quantity + 1)
+                          }
+                          className="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-md shadow flex justify-center items-center"
                         >
                           +
                         </button>
                       </div>
 
+                      {/* REMOVE */}
                       <button
                         onClick={() => removeFromCart(item.id)}
-                        style={{
-                          color: "#EF4444",
-                          background: "none",
-                          border: "none",
-                          cursor: "pointer",
-                          fontWeight: "500",
-                        }}
+                        className="text-red-400 hover:text-red-300 font-semibold transition"
                       >
                         Remove
                       </button>
                     </div>
                   </div>
 
-                  <div style={{ fontWeight: "bold" }}>
-                    ${(item.price * item.quantity).toFixed(2)}
+                  {/* TOTAL */}
+                  <div className="font-bold text-lg text-purple-300">
+                    {formatINR(item.price * item.quantity)}
                   </div>
                 </div>
               ))}
             </div>
 
-            {/* Order Summary */}
-            <div style={{ backgroundColor: "white", borderRadius: "8px", padding: "1.5rem", height: "fit-content" }}>
-              <h3 style={{ margin: "0 0 1.5rem 0" }}>Order Summary</h3>
-              
-              <div style={{ marginBottom: "1rem" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
+            {/* ORDER SUMMARY */}
+            <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 shadow-xl animate-slideUp h-fit">
+              <h3 className="text-2xl font-bold mb-4">Order Summary</h3>
+
+              <div className="space-y-2 text-lg">
+                <div className="flex justify-between opacity-80">
                   <span>Subtotal</span>
-                  <span>${getTotalPrice().toFixed(2)}</span>
+                  <span>{formatINR(getTotalPrice())}</span>
                 </div>
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
+
+                <div className="flex justify-between opacity-80">
                   <span>Shipping</span>
                   <span>Free</span>
                 </div>
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
+
+                <div className="flex justify-between opacity-80">
                   <span>Tax</span>
-                  <span>$0.00</span>
+                  <span>{formatINR(0)}</span>
                 </div>
-                <div style={{ 
-                  display: "flex", 
-                  justifyContent: "space-between", 
-                  marginTop: "1rem", 
-                  paddingTop: "1rem", 
-                  borderTop: "2px solid #e5e7eb",
-                  fontWeight: "bold",
-                  fontSize: "1.125rem"
-                }}>
+
+                <div className="flex justify-between font-bold text-purple-300 pt-3 mt-3 border-t border-white/20 text-xl">
                   <span>Total</span>
-                  <span>${getTotalPrice().toFixed(2)}</span>
+                  <span>{formatINR(getTotalPrice())}</span>
                 </div>
               </div>
 
               <button
                 onClick={handleCheckout}
-                style={{
-                  width: "100%",
-                  padding: "1rem",
-                  backgroundColor: "#10B981",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "6px",
-                  cursor: "pointer",
-                  fontWeight: "500",
-                  fontSize: "1rem",
-                  marginTop: "1rem",
-                }}
+                className="
+                  w-full mt-6 py-3 bg-purple-600 hover:bg-purple-700 
+                  rounded-lg font-semibold text-white shadow-lg 
+                  hover:scale-105 transition
+                "
               >
                 Proceed to Checkout
               </button>
@@ -284,6 +211,26 @@ export default function CartPage() {
           </div>
         )}
       </div>
+
+      {/* ANIMATIONS */}
+      <style>
+        {`
+          @keyframes fadeInSlow {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+          }
+          .animate-fadeInSlow {
+            animation: fadeInSlow 1.2s ease-out forwards;
+          }
+          @keyframes slideUp {
+            0% { opacity: 0; transform: translateY(50px); }
+            100% { opacity: 1; transform: translateY(0); }
+          }
+          .animate-slideUp {
+            animation: slideUp 1s ease-out forwards;
+          }
+        `}
+      </style>
     </div>
   );
 }

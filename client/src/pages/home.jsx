@@ -2,131 +2,64 @@ import { Link } from "react-router-dom";
 
 export default function Home() {
   return (
-    <div style={{ minHeight: "100vh", backgroundColor: "#f5f5f5" }}>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-800 to-indigo-700">
       {/* Header */}
       <header
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 1000,
-          padding: "1rem 2rem",
-          backgroundColor: "white",
-          boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-        }}
+        className="fixed top-0 left-0 right-0 z-50 px-6 py-4 
+        backdrop-blur-xl bg-white/10 border-b border-white/20
+        shadow-lg"
       >
-        <h1 style={{ margin: 0, fontSize: "1.5rem", color: "#333" }}>
+        <h1 className="text-3xl font-bold text-white tracking-wide drop-shadow-md">
           E-Commerce Platform
         </h1>
       </header>
 
       {/* Main Content */}
-      <main
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "6rem 2rem 4rem 2rem",
-          minHeight: "100vh",
-        }}
-      >
-        <h2 style={{ fontSize: "2rem", marginBottom: "1rem", color: "#333" }}>
+      <main className="flex flex-col items-center justify-center min-h-screen px-6 pt-28 text-white">
+        {/* Title Section */}
+        <h2 className="text-4xl font-extrabold drop-shadow-lg animate-fadeInSlow">
           Welcome to Our E-Commerce Platform
         </h2>
-        <p style={{ fontSize: "1.1rem", color: "#666", marginBottom: "3rem" }}>
+
+        <p className="text-lg opacity-90 mt-3 animate-slideUp delay-100">
           Choose your account type to get started
         </p>
 
-        {/* Role Selection Cards */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-            gap: "2rem",
-            maxWidth: "1100px",
-            width: "100%",
-          }}
-        >
+        {/* Cards Container */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12 max-w-5xl w-full animate-fadeInSlow">
           {/* Seller Card */}
           <div
-            style={{
-              backgroundColor: "white",
-              borderRadius: "12px",
-              padding: "2rem",
-              boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
-              textAlign: "center",
-              transition: "transform 0.2s",
-            }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.transform = "translateY(-5px)")
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.transform = "translateY(0)")
-            }
+            className="p-8 text-center bg-white/10 backdrop-blur-xl border border-white/20 
+            rounded-2xl shadow-xl transition-all duration-300 hover:scale-[1.03] hover:shadow-purple-400/40 animate-float"
           >
-            <div
-              style={{
-                fontSize: "3rem",
-                marginBottom: "1rem",
-              }}
-            >
-              🏪
-            </div>
-            <h3
-              style={{
-                fontSize: "1.5rem",
-                marginBottom: "1rem",
-                color: "#333",
-              }}
-            >
+            <div className="text-6xl mb-3">🏪</div>
+
+            <h3 className="text-2xl font-bold mb-2 text-white">
               Seller Account
             </h3>
-            <p style={{ color: "#666", marginBottom: "1.5rem" }}>
+
+            <p className="text-white/80 mb-6">
               Sell your products and manage your inventory
             </p>
-            <div style={{ display: "flex", gap: "1rem", justifyContent: "center" }}>
+
+            <div className="flex gap-4 justify-center">
               <Link
                 to="/seller/sign-in"
-                style={{
-                  padding: "0.75rem 1.5rem",
-                  backgroundColor: "#4F46E5",
-                  color: "white",
-                  textDecoration: "none",
-                  borderRadius: "8px",
-                  fontWeight: "500",
-                  transition: "background-color 0.2s",
-                }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.backgroundColor = "#4338CA")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.backgroundColor = "#4F46E5")
-                }
+                className="
+                  px-6 py-2 bg-indigo-600 rounded-lg text-white font-semibold 
+                  transition-all duration-300 hover:bg-indigo-700 hover:scale-105 active:scale-95
+                "
               >
                 Sign In
               </Link>
+
               <Link
                 to="/seller/sign-up"
-                style={{
-                  padding: "0.75rem 1.5rem",
-                  backgroundColor: "white",
-                  color: "#4F46E5",
-                  textDecoration: "none",
-                  borderRadius: "8px",
-                  fontWeight: "500",
-                  border: "2px solid #4F46E5",
-                  transition: "all 0.2s",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = "#4F46E5";
-                  e.currentTarget.style.color = "white";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "white";
-                  e.currentTarget.style.color = "#4F46E5";
-                }}
+                className="
+                  px-6 py-2 bg-white/20 border border-white/40 rounded-lg 
+                  text-white font-semibold transition-all duration-300 
+                  hover:bg-indigo-600 hover:border-indigo-400 hover:scale-105 active:scale-95
+                "
               >
                 Sign Up
               </Link>
@@ -135,103 +68,95 @@ export default function Home() {
 
           {/* Buyer Card */}
           <div
-            style={{
-              backgroundColor: "white",
-              borderRadius: "12px",
-              padding: "2rem",
-              boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
-              textAlign: "center",
-              transition: "transform 0.2s",
-            }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.transform = "translateY(-5px)")
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.transform = "translateY(0)")
-            }
+            className="p-8 text-center bg-white/10 backdrop-blur-xl border border-white/20 
+            rounded-2xl shadow-xl transition-all duration-300 hover:scale-[1.03] hover:shadow-green-400/40 animate-float delay-200"
           >
-            <div
-              style={{
-                fontSize: "3rem",
-                marginBottom: "1rem",
-              }}
-            >
-              🛒
-            </div>
-            <h3
-              style={{
-                fontSize: "1.5rem",
-                marginBottom: "1rem",
-                color: "#333",
-              }}
-            >
+            <div className="text-6xl mb-3">🛒</div>
+
+            <h3 className="text-2xl font-bold mb-2 text-white">
               Buyer Account
             </h3>
-            <p style={{ color: "#666", marginBottom: "1.5rem" }}>
+
+            <p className="text-white/80 mb-6">
               Browse and purchase products from our sellers
             </p>
-            <div style={{ display: "flex", gap: "1rem", justifyContent: "center" }}>
+
+            <div className="flex gap-4 justify-center">
               <Link
                 to="/buyer/sign-in"
-                style={{
-                  padding: "0.75rem 1.5rem",
-                  backgroundColor: "#10B981",
-                  color: "white",
-                  textDecoration: "none",
-                  borderRadius: "8px",
-                  fontWeight: "500",
-                  transition: "background-color 0.2s",
-                }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.backgroundColor = "#059669")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.backgroundColor = "#10B981")
-                }
+                className="
+                  px-6 py-2 bg-emerald-500 rounded-lg text-white font-semibold 
+                  transition-all duration-300 hover:bg-emerald-600 hover:scale-105 active:scale-95
+                "
               >
                 Sign In
               </Link>
+
               <Link
                 to="/buyer/sign-up"
-                style={{
-                  padding: "0.75rem 1.5rem",
-                  backgroundColor: "white",
-                  color: "#10B981",
-                  textDecoration: "none",
-                  borderRadius: "8px",
-                  fontWeight: "500",
-                  border: "2px solid #10B981",
-                  transition: "all 0.2s",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = "#10B981";
-                  e.currentTarget.style.color = "white";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "white";
-                  e.currentTarget.style.color = "#10B981";
-                }}
+                className="
+                  px-6 py-2 bg-white/20 border border-white/40 rounded-lg 
+                  text-white font-semibold transition-all duration-300 
+                  hover:bg-emerald-500 hover:border-emerald-300 hover:scale-105 active:scale-95
+                "
               >
                 Sign Up
               </Link>
             </div>
           </div>
         </div>
-        
+
         {/* Admin Note */}
-        <div style={{ 
-          marginTop: "2rem", 
-          padding: "1rem", 
-          backgroundColor: "#EFF6FF", 
-          borderRadius: "8px", 
-          textAlign: "center",
-          maxWidth: "600px"
-        }}>
-          <p style={{ color: "#1E40AF", margin: 0 }}>
-            <strong>Administrator Access:</strong> Users with email <em>kartikparmar9773@gmail.com</em> will be automatically recognized as administrators upon login.
+        <div
+          className="
+          mt-10 p-4 bg-white/10 backdrop-blur-xl border border-white/20 
+          rounded-xl max-w-xl text-center shadow-lg animate-slideUp delay-300
+        "
+        >
+          <p className="text-indigo-200">
+            <strong className="text-white">Administrator Access:</strong>
+            Users with email
+            <span className="font-semibold text-yellow-300">
+              {" "}
+              kartikparmar9773@gmail.com{" "}
+            </span>
+            will be automatically recognized as admins.
           </p>
         </div>
       </main>
+
+      {/* Custom Animations */}
+      <style>
+        {`
+          @keyframes fadeInSlow {
+            0% { opacity: 0; transform: translateY(20px) }
+            100% { opacity: 1; transform: translateY(0) }
+          }
+          .animate-fadeInSlow {
+            animation: fadeInSlow 1.2s ease-out forwards;
+          }
+
+          @keyframes slideUp {
+            0% { opacity: 0; transform: translateY(40px) }
+            100% { opacity: 1; transform: translateY(0) }
+          }
+          .animate-slideUp {
+            animation: slideUp 1.2s ease-out forwards;
+          }
+          .delay-100 { animation-delay: 0.2s }
+          .delay-200 { animation-delay: 0.4s }
+          .delay-300 { animation-delay: 0.6s }
+
+          @keyframes float {
+            0% { transform: translateY(0) }
+            50% { transform: translateY(-10px) }
+            100% { transform: translateY(0) }
+          }
+          .animate-float {
+            animation: float 3.5s ease-in-out infinite;
+          }
+        `}
+      </style>
     </div>
   );
 }

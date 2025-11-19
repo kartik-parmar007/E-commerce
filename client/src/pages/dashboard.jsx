@@ -3,163 +3,134 @@ import { Link } from "react-router-dom";
 
 export default function Dashboard() {
   return (
-    <div style={{ minHeight: "100vh", backgroundColor: "#f5f5f5" }}>
-      <header
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 1000,
-          padding: "1rem 2rem",
-          backgroundColor: "white",
-          boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <h1 style={{ margin: 0, fontSize: "1.5rem", color: "#333" }}>
+    <div className="min-h-screen bg-gradient-to-br from-[#1e1b4b] via-[#312e81] to-[#4c1d95] relative overflow-hidden">
+      {/* Floating background circles */}
+      <div className="absolute top-[-10%] left-[-10%] w-72 h-72 bg-pink-500 opacity-30 rounded-full blur-3xl animate-pulse"></div>
+      <div className="absolute bottom-[-10%] right-[-10%] w-72 h-72 bg-indigo-500 opacity-30 rounded-full blur-3xl animate-pulse delay-700"></div>
+
+      {/* HEADER */}
+      <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-white/10 border-b border-white/20 shadow-lg px-6 py-4 flex justify-between items-center">
+        <h1 className="text-3xl font-semibold text-white tracking-wide drop-shadow-md">
           E-Commerce
         </h1>
+
         <SignedOut>
-          <nav style={{ display: "flex", gap: "1rem" }}>
+          <nav className="flex gap-4">
             <Link
               to="/"
-              style={{
-                padding: "0.5rem 1rem",
-                backgroundColor: "#4F46E5",
-                color: "white",
-                textDecoration: "none",
-                borderRadius: "6px",
-                fontWeight: "500",
-              }}
+              className="px-5 py-2 bg-pink-500 text-white font-medium rounded-lg
+              shadow-md hover:bg-pink-600 hover:scale-105 active:scale-95 transition duration-300"
             >
               Home
             </Link>
           </nav>
         </SignedOut>
+
         <SignedIn>
-          <UserButton />
+          <UserButton afterSignOutUrl="/" />
         </SignedIn>
       </header>
-      <main
-  style={{
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-    minHeight: "100vh",
-    paddingTop: "5rem",
-    padding: "5rem 2rem 2rem 2rem",
-    background: "linear-gradient(135deg, #667eea, #764ba2)",
-    color: "#fff",
-    fontFamily: "'Roboto', sans-serif",
-    overflow: "auto",
-  }}
->
-  <SignedOut>
-    <div
-      style={{
-        textAlign: "center",
-        marginTop: "4rem",
-        animation: "fadeIn 1.5s ease-in-out",
-      }}
-    >
-      <h2
-        style={{
-          fontSize: "2.5rem",
-          fontWeight: "bold",
-          marginBottom: "1rem",
-          animation: "slideInDown 1s ease-out",
-        }}
-      >
-        Welcome to E-Commerce
-      </h2>
-      <p
-        style={{
-          fontSize: "1.2rem",
-          opacity: 0.9,
-          animation: "slideInUp 1s ease-out 0.5s forwards",
-          transform: "translateY(20px)",
-        }}
-      >
-        Please sign in or sign up to continue
-      </p>
-      <div style={{ marginTop: "2rem" }}>
-        <button
-          style={{
-            padding: "0.8rem 2rem",
-            fontSize: "1rem",
-            fontWeight: "bold",
-            borderRadius: "8px",
-            border: "none",
-            cursor: "pointer",
-            background: "#ff6f61",
-            color: "#fff",
-            boxShadow: "0 4px 15px rgba(0,0,0,0.2)",
-            transition: "all 0.3s ease",
-          }}
-          onMouseEnter={(e) => (e.target.style.transform = "scale(1.05)")}
-          onMouseLeave={(e) => (e.target.style.transform = "scale(1)")}
-        >
-          Sign In / Sign Up
-        </button>
-      </div>
-    </div>
-  </SignedOut>
 
-  <SignedIn>
-    <div
-      style={{
-        textAlign: "center",
-        marginTop: "4rem",
-        animation: "fadeIn 1.5s ease-in-out",
-      }}
-    >
-      <h2
-        style={{
-          fontSize: "2.5rem",
-          fontWeight: "bold",
-          marginBottom: "1rem",
-          color: "#ffeb3b",
-          animation: "slideInDown 1s ease-out",
-        }}
-      >
-        Welcome to Your E-Commerce Dashboard
-      </h2>
-      <p
-        style={{
-          fontSize: "1.2rem",
-          opacity: 0.9,
-          animation: "slideInUp 1s ease-out 0.5s forwards",
-          transform: "translateY(20px)",
-        }}
-      >
-        You are successfully signed in!
-      </p>
-    </div>
-  </SignedIn>
+      {/* MAIN SECTION */}
+      <main className="flex flex-col justify-center items-center min-h-screen pt-24 px-6 text-white">
+        {/* SIGNED OUT VIEW */}
+        <SignedOut>
+          <div className="text-center mt-16 animate-fadeInSlow">
+            <h2 className="text-5xl font-extrabold mb-4 animate-slideDownGlow drop-shadow-lg">
+              Welcome to E-Commerce
+            </h2>
 
-  {/* CSS Animations */}
-  <style>
-    {`
-      @keyframes fadeIn {
-        0% { opacity: 0; }
-        100% { opacity: 1; }
-      }
-      @keyframes slideInDown {
-        0% { opacity: 0; transform: translateY(-50px); }
-        100% { opacity: 1; transform: translateY(0); }
-      }
-      @keyframes slideInUp {
-        0% { opacity: 0; transform: translateY(20px); }
-        100% { opacity: 1; transform: translateY(0); }
-      }
-    `}
-  </style>
-</main>
+            <p className="text-xl opacity-90 animate-slideUp">
+              Please sign in or sign up to continue
+            </p>
 
+            {/* Glassmorphism button */}
+            <div className="mt-10">
+              <button
+                className="
+                  px-8 py-3 
+                  bg-white/20 backdrop-blur-xl 
+                  border border-white/30 
+                  text-white font-semibold 
+                  rounded-xl shadow-lg 
+                  transition-all duration-300
+                  hover:scale-110 hover:shadow-pink-500/50
+                  active:scale-95
+                "
+              >
+                Sign In / Sign Up
+              </button>
+            </div>
+          </div>
+        </SignedOut>
+
+        {/* SIGNED IN VIEW */}
+        <SignedIn>
+          <div className="text-center mt-16 animate-fadeInSlow">
+            <h2 className="text-5xl font-extrabold mb-4 text-yellow-300 animate-slideDownGlow drop-shadow-lg">
+              Welcome to Your Dashboard
+            </h2>
+
+            <p className="text-xl opacity-90 animate-slideUp">
+              You are successfully signed in!
+            </p>
+
+            {/* Animated Glass Card */}
+            <div
+              className="
+              mt-10 p-6 
+              w-full max-w-md 
+              bg-white/10 backdrop-blur-xl 
+              border border-white/20 rounded-2xl 
+              shadow-xl animate-float 
+            "
+            >
+              <h3 className="text-2xl font-semibold mb-3">✨ Your Account</h3>
+              <p className="opacity-80">
+                Explore products, manage your cart, review orders and much more.
+              </p>
+            </div>
+          </div>
+        </SignedIn>
+      </main>
+
+      {/* CUSTOM ANIMATIONS */}
+      <style>
+        {`
+          @keyframes fadeInSlow {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+          }
+          .animate-fadeInSlow {
+            animation: fadeInSlow 1.5s ease-out forwards;
+          }
+
+          @keyframes slideDownGlow {
+            0% { opacity: 0; transform: translateY(-40px); text-shadow: none; }
+            100% { opacity: 1; transform: translateY(0); text-shadow: 0 0 15px rgba(255,255,255,0.6); }
+          }
+          .animate-slideDownGlow {
+            animation: slideDownGlow 1.2s ease-out forwards;
+          }
+
+          @keyframes slideUp {
+            0% { opacity: 0; transform: translateY(30px); }
+            100% { opacity: 1; transform: translateY(0); }
+          }
+          .animate-slideUp {
+            animation: slideUp 1.2s ease-out 0.3s forwards;
+          }
+
+          @keyframes float {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0); }
+          }
+          .animate-float {
+            animation: float 3s ease-in-out infinite;
+          }
+        `}
+      </style>
     </div>
   );
 }

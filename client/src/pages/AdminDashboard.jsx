@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+  import { useState, useEffect } from "react";
+import { formatINR } from "../utils/formatCurrency";
 import { useAuth, useUser, UserButton, SignedIn } from "@clerk/clerk-react";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -8,7 +9,7 @@ export default function AdminDashboard() {
   const { getToken } = useAuth();
   const { user } = useUser();
   const navigate = useNavigate();
-  
+
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -18,7 +19,7 @@ export default function AdminDashboard() {
     description: "",
     price: "",
     stock: "",
-    image_url: ""
+    image_url: "",
   });
   const [message, setMessage] = useState("");
 
@@ -28,14 +29,10 @@ export default function AdminDashboard() {
       setLoading(true);
       const token = await getToken();
       const response = await fetch(`${API_URL}/api/admin/products`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
       const data = await response.json();
-      if (data.success) {
-        setProducts(data.data);
-      }
+      if (data.success) setProducts(data.data);
     } catch (error) {
       console.error("Error fetching products:", error);
       setMessage("Failed to fetch products");
@@ -50,33 +47,31 @@ export default function AdminDashboard() {
 
   // Handle delete product
   const handleDeleteProduct = async (productId) => {
-    if (!window.confirm("Are you sure you want to delete this product?")) {
+    if (!window.confirm("Are you sure you want to delete this product?"))
       return;
-    }
-    
+
     try {
       const token = await getToken();
-      const response = await fetch(`${API_URL}/api/admin/products/${productId}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      
+      const response = await fetch(
+        `${API_URL}/api/admin/products/${productId}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
       const data = await response.json();
       if (data.success) {
         setMessage("Product deleted successfully");
-        fetchProducts(); // Refresh the product list
-      } else {
-        setMessage(data.message || "Failed to delete product");
-      }
+        fetchProducts();
+      } else setMessage(data.message || "Failed to delete product");
     } catch (error) {
       console.error("Error deleting product:", error);
       setMessage("Failed to delete product");
     }
   };
 
-  // Handle edit product
+  // Edit Product
   const handleEditProduct = (product) => {
     setSelectedProduct(product);
     setIsEditing(true);
@@ -85,56 +80,54 @@ export default function AdminDashboard() {
       description: product.description || "",
       price: product.price,
       stock: product.stock || 0,
-      image_url: product.image_url || ""
+      image_url: product.image_url || "",
     });
   };
 
-  // Handle update product
+  // Update Product
   const handleUpdateProduct = async (e) => {
     e.preventDefault();
-    
+
     try {
       const token = await getToken();
-      const response = await fetch(`${API_URL}/api/admin/products/${selectedProduct.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          name: editForm.name,
-          description: editForm.description,
-          price: parseFloat(editForm.price),
-          stock: parseInt(editForm.stock),
-          image_url: editForm.image_url
-        }),
-      });
-      
+      const response = await fetch(
+        `${API_URL}/api/admin/products/${selectedProduct.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            name: editForm.name,
+            description: editForm.description,
+            price: parseFloat(editForm.price),
+            stock: parseInt(editForm.stock),
+            image_url: editForm.image_url,
+          }),
+        }
+      );
+
       const data = await response.json();
       if (data.success) {
         setMessage("Product updated successfully");
         setIsEditing(false);
         setSelectedProduct(null);
-        fetchProducts(); // Refresh the product list
-      } else {
-        setMessage(data.message || "Failed to update product");
-      }
+        fetchProducts();
+      } else setMessage(data.message || "Failed to update product");
     } catch (error) {
       console.error("Error updating product:", error);
       setMessage("Failed to update product");
     }
   };
 
-  // Handle form input changes
+  // Input Change
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setEditForm(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setEditForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Cancel editing
+  // Cancel Edit
   const cancelEditing = () => {
     setIsEditing(false);
     setSelectedProduct(null);
@@ -143,50 +136,35 @@ export default function AdminDashboard() {
       description: "",
       price: "",
       stock: "",
-      image_url: ""
+      image_url: "",
     });
   };
 
   return (
-    <div style={{ minHeight: "100vh", backgroundColor: "#f5f5f5" }}>
-      {/* Navigation Header */}
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-indigo-900 text-white">
+      {/* Header */}
       <header
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 1000,
-          padding: "1rem 2rem",
-          backgroundColor: "white",
-          boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
+        className="fixed top-0 left-0 right-0 z-50 px-6 py-4 
+        backdrop-blur-xl bg-white/10 border-b border-white/20 shadow-lg flex justify-between items-center"
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "2rem" }}>
-          <h1 style={{ margin: 0, fontSize: "1.5rem", color: "#4F46E5" }}>
+        <div className="flex items-center gap-6">
+          <h1 className="text-3xl font-bold text-purple-300 drop-shadow-md">
             🔐 Admin Dashboard
           </h1>
-          <nav style={{ display: "flex", gap: "1rem" }}>
+
+          <nav className="flex gap-3">
             <Link
               to="/"
-              style={{
-                padding: "0.5rem 1rem",
-                color: "#666",
-                textDecoration: "none",
-                borderRadius: "6px",
-                fontWeight: "500",
-              }}
+              className="px-4 py-2 rounded-lg bg-white/10 text-white hover:bg-white/20 transition"
             >
               Home
             </Link>
           </nav>
         </div>
+
         <SignedIn>
-          <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-            <span style={{ color: "#666", fontSize: "0.9rem" }}>
+          <div className="flex items-center gap-3">
+            <span className="text-sm opacity-80">
               {user?.primaryEmailAddress?.emailAddress}
             </span>
             <UserButton />
@@ -194,44 +172,42 @@ export default function AdminDashboard() {
         </SignedIn>
       </header>
 
-      {/* Main Content */}
-      <div style={{ padding: "6rem 2rem 2rem 2rem", maxWidth: "1200px", margin: "0 auto" }}>
-        <div style={{ marginBottom: "2rem", textAlign: "center" }}>
-          <h2 style={{ color: "#333", marginBottom: "0.5rem" }}>Admin Dashboard</h2>
-          <p style={{ color: "#666" }}>Manage all products in the system</p>
+      {/* Main Body */}
+      <div className="pt-28 px-6 max-w-6xl mx-auto">
+        {/* Page Title */}
+        <div className="text-center mb-6">
+          <h2 className="text-4xl font-bold drop-shadow-md animate-fadeInSlow">
+            Manage Products
+          </h2>
+          <p className="opacity-70">Admin Control Panel</p>
         </div>
 
-        {/* Message Display */}
+        {/* Message */}
         {message && (
-          <div 
-            style={{ 
-              padding: "1rem", 
-              marginBottom: "1rem", 
-              borderRadius: "6px", 
-              backgroundColor: message.includes("Failed") ? "#FEE2E2" : "#D1FAE5",
-              color: message.includes("Failed") ? "#B91C1C" : "#065F46",
-              textAlign: "center"
-            }}
+          <div
+            className={`
+            p-3 mb-4 rounded-xl text-center animate-fadeInSlow 
+            ${
+              message.includes("Failed")
+                ? "bg-red-300/20 text-red-200 border border-red-400/40"
+                : "bg-green-300/20 text-green-200 border border-green-400/40"
+            }
+          `}
           >
             {message}
           </div>
         )}
 
-        {/* Edit Product Form */}
+        {/* Edit Form */}
         {isEditing && selectedProduct && (
-          <div 
-            style={{ 
-              backgroundColor: "white", 
-              borderRadius: "8px", 
-              padding: "2rem", 
-              marginBottom: "2rem",
-              boxShadow: "0 4px 6px rgba(0,0,0,0.05)"
-            }}
-          >
-            <h3 style={{ margin: "0 0 1.5rem 0" }}>Edit Product</h3>
-            <form onSubmit={handleUpdateProduct}>
-              <div style={{ marginBottom: "1rem" }}>
-                <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+          <div className="bg-white/10 backdrop-blur-xl border border-white/20 shadow-xl p-6 rounded-2xl mb-10 animate-slideUp">
+            <h3 className="text-xl font-semibold mb-4 text-purple-200">
+              Edit Product
+            </h3>
+
+            <form onSubmit={handleUpdateProduct} className="space-y-4">
+              <div>
+                <label className="font-medium text-purple-100">
                   Product Name
                 </label>
                 <input
@@ -239,129 +215,78 @@ export default function AdminDashboard() {
                   name="name"
                   value={editForm.name}
                   onChange={handleInputChange}
-                  style={{
-                    width: "100%",
-                    padding: "0.75rem",
-                    borderRadius: "6px",
-                    border: "1px solid #d1d5db",
-                    fontSize: "1rem"
-                  }}
+                  className="w-full p-3 rounded-lg bg-white/20 text-white border border-white/30 focus:ring-2 focus:ring-purple-400"
                   required
                 />
               </div>
-              
-              <div style={{ marginBottom: "1rem" }}>
-                <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+
+              <div>
+                <label className="font-medium text-purple-100">
                   Description
                 </label>
                 <textarea
                   name="description"
                   value={editForm.description}
                   onChange={handleInputChange}
-                  style={{
-                    width: "100%",
-                    padding: "0.75rem",
-                    borderRadius: "6px",
-                    border: "1px solid #d1d5db",
-                    fontSize: "1rem",
-                    minHeight: "100px"
-                  }}
+                  className="w-full p-3 rounded-lg bg-white/20 text-white border border-white/30 min-h-[120px]"
                 />
               </div>
-              
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "1rem" }}>
+
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
-                    Price ($)
+                  <label className="font-medium text-purple-100">
+                    Price (INR)
                   </label>
                   <input
                     type="number"
                     name="price"
                     value={editForm.price}
                     onChange={handleInputChange}
-                    step="0.01"
                     min="0"
-                    style={{
-                      width: "100%",
-                      padding: "0.75rem",
-                      borderRadius: "6px",
-                      border: "1px solid #d1d5db",
-                      fontSize: "1rem"
-                    }}
+                    step="0.01"
+                    className="w-full p-3 rounded-lg bg-white/20 text-white border border-white/30"
                     required
                   />
                 </div>
-                
+
                 <div>
-                  <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
-                    Stock
-                  </label>
+                  <label className="font-medium text-purple-100">Stock</label>
                   <input
                     type="number"
                     name="stock"
                     value={editForm.stock}
                     onChange={handleInputChange}
                     min="0"
-                    style={{
-                      width: "100%",
-                      padding: "0.75rem",
-                      borderRadius: "6px",
-                      border: "1px solid #d1d5db",
-                      fontSize: "1rem"
-                    }}
+                    className="w-full p-3 rounded-lg bg-white/20 text-white border border-white/30"
                     required
                   />
                 </div>
               </div>
-              
-              <div style={{ marginBottom: "1.5rem" }}>
-                <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
-                  Image URL
-                </label>
+
+              <div>
+                <label className="font-medium text-purple-100">Image URL</label>
                 <input
                   type="text"
                   name="image_url"
                   value={editForm.image_url}
                   onChange={handleInputChange}
-                  style={{
-                    width: "100%",
-                    padding: "0.75rem",
-                    borderRadius: "6px",
-                    border: "1px solid #d1d5db",
-                    fontSize: "1rem"
-                  }}
+                  className="w-full p-3 rounded-lg bg-white/20 text-white border border-white/30"
                 />
               </div>
-              
-              <div style={{ display: "flex", gap: "1rem" }}>
+
+              {/* Buttons */}
+              <div className="flex gap-4 mt-4">
                 <button
                   type="submit"
-                  style={{
-                    padding: "0.75rem 1.5rem",
-                    backgroundColor: "#4F46E5",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "6px",
-                    cursor: "pointer",
-                    fontWeight: "500",
-                    fontSize: "1rem",
-                  }}
+                  className="px-6 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white shadow-lg hover:scale-105 transition"
                 >
                   Update Product
                 </button>
+
                 <button
                   type="button"
                   onClick={cancelEditing}
-                  style={{
-                    padding: "0.75rem 1.5rem",
-                    backgroundColor: "#e5e7eb",
-                    color: "#374151",
-                    border: "none",
-                    borderRadius: "6px",
-                    cursor: "pointer",
-                    fontWeight: "500",
-                    fontSize: "1rem",
-                  }}
+                  className="px-6 py-2 bg-gray-400/30 hover:bg-gray-500/40 rounded-lg text-white shadow-lg hover:scale-105 transition"
                 >
                   Cancel
                 </button>
@@ -370,181 +295,113 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* Products List */}
-        <div>
-          <h2 style={{ marginBottom: "1.5rem" }}>
-            All Products ({products.length})
-          </h2>
+        {/* Product List */}
+        <h2 className="text-2xl font-semibold mb-4">
+          All Products ({products.length})
+        </h2>
 
-          {loading ? (
-            <p style={{ textAlign: "center", padding: "3rem" }}>Loading products...</p>
-          ) : products.length === 0 ? (
-            <p style={{ textAlign: "center", color: "#666", padding: "3rem" }}>
-              No products available
-            </p>
-          ) : (
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-                gap: "1.5rem",
-              }}
-            >
-              {products.map((product) => (
-                <div
-                  key={product.id}
-                  style={{
-                    border: "1px solid #e5e7eb",
-                    borderRadius: "8px",
-                    padding: "1rem",
-                    backgroundColor: "white",
-                    transition: "transform 0.2s, box-shadow 0.2s",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = "translateY(-5px)";
-                    e.currentTarget.style.boxShadow = "0 10px 25px rgba(0,0,0,0.1)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = "translateY(0)";
-                    e.currentTarget.style.boxShadow = "none";
-                  }}
-                >
-                  {product.image_url ? (
-                    product.image_url.match(/\.(mp4|mov|webm|mpeg)$/i) ? (
-                      <video
-                        src={`${API_URL}${product.image_url}`}
-                        controls
-                        style={{
-                          width: "100%",
-                          height: "200px",
-                          objectFit: "cover",
-                          borderRadius: "6px",
-                          marginBottom: "1rem",
-                        }}
-                      />
-                    ) : (
-                      <img
-                        src={`${API_URL}${product.image_url}`}
-                        alt={product.name}
-                        style={{
-                          width: "100%",
-                          height: "200px",
-                          objectFit: "cover",
-                          borderRadius: "6px",
-                          marginBottom: "1rem",
-                        }}
-                      />
-                    )
+        {loading ? (
+          <p className="text-center py-10 animate-pulse">Loading products...</p>
+        ) : products.length === 0 ? (
+          <p className="text-center opacity-70 py-10">No products available</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {products.map((product) => (
+              <div
+                key={product.id}
+                className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-4 shadow-lg 
+                transition-all duration-300 hover:scale-[1.03] hover:shadow-purple-400/40 animate-fadeInSlow"
+              >
+                {/* Product Media */}
+                {product.image_url ? (
+                  product.image_url.match(/\.(mp4|mov|webm|mpeg)$/i) ? (
+                    <video
+                      src={`${API_URL}${product.image_url}`}
+                      controls
+                      className="w-full h-48 rounded-lg object-cover mb-3"
+                    />
                   ) : (
-                    <div
-                      style={{
-                        width: "100%",
-                        height: "200px",
-                        backgroundColor: "#f3f4f6",
-                        borderRadius: "6px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        marginBottom: "1rem",
-                        color: "#9ca3af",
-                        fontSize: "3rem",
-                      }}
-                    >
-                      📦
-                    </div>
-                  )}
+                    <img
+                      src={`${API_URL}${product.image_url}`}
+                      alt={product.name}
+                      className="w-full h-48 rounded-lg object-cover mb-3"
+                    />
+                  )
+                ) : (
+                  <div className="w-full h-48 bg-white/10 rounded-xl flex items-center justify-center text-4xl">
+                    📦
+                  </div>
+                )}
 
-                  <h3 style={{ margin: "0 0 0.5rem 0", fontSize: "1.125rem" }}>
-                    {product.name}
-                  </h3>
+                {/* Product Info */}
+                <h3 className="text-xl font-semibold">{product.name}</h3>
 
-                  <p
-                    style={{
-                      color: "#666",
-                      fontSize: "0.875rem",
-                      marginBottom: "0.75rem",
-                      minHeight: "40px",
-                    }}
+                <p className="text-sm opacity-80 min-h-[40px]">
+                  {product.description || "No description available"}
+                </p>
+
+                <p className="text-purple-300 text-xl font-bold mt-2">
+                  {formatINR(product.price)}
+                </p>
+
+                <p
+                  className={`text-sm font-semibold mt-1 
+                  ${product.stock > 0 ? "text-green-300" : "text-red-300"}`}
+                >
+                  {product.stock > 0
+                    ? `${product.stock} in stock`
+                    : "Out of stock"}
+                </p>
+
+                <p className="text-xs opacity-70 mt-1">
+                  Seller:{" "}
+                  {product.seller_name ||
+                    product.seller_email ||
+                    product.seller_id}
+                </p>
+
+                {/* Buttons */}
+                <div className="flex gap-3 mt-4">
+                  <button
+                    onClick={() => handleEditProduct(product)}
+                    className="flex-1 px-3 py-2 bg-yellow-500/80 hover:bg-yellow-600 rounded-lg text-white font-medium shadow-md hover:scale-105 transition"
                   >
-                    {product.description || "No description available"}
-                  </p>
+                    Edit
+                  </button>
 
-                  <div style={{ marginBottom: "1rem" }}>
-                    <p
-                      style={{
-                        fontSize: "1.25rem",
-                        fontWeight: "bold",
-                        color: "#4F46E5",
-                        margin: "0.5rem 0",
-                      }}
-                    >
-                      ${parseFloat(product.price).toFixed(2)}
-                    </p>
-
-                    <p
-                      style={{
-                        fontSize: "0.875rem",
-                        color: product.stock > 0 ? "#10B981" : "#EF4444",
-                        fontWeight: "500",
-                      }}
-                    >
-                      {product.stock > 0
-                        ? `${product.stock} in stock`
-                        : "Out of stock"}
-                    </p>
-                    
-                    <p
-                      style={{
-                        fontSize: "0.875rem",
-                        color: "#666",
-                        fontWeight: "500",
-                        marginTop: "0.5rem",
-                      }}
-                    >
-                      Seller: {product.seller_name || product.seller_email || product.seller_id}
-                    </p>
-                  </div>
-
-                  <div style={{ display: "flex", gap: "0.5rem" }}>
-                    <button
-                      onClick={() => handleEditProduct(product)}
-                      style={{
-                        flex: 1,
-                        padding: "0.5rem",
-                        backgroundColor: "#F59E0B",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "6px",
-                        cursor: "pointer",
-                        fontWeight: "500",
-                        fontSize: "0.875rem",
-                      }}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDeleteProduct(product.id)}
-                      style={{
-                        flex: 1,
-                        padding: "0.5rem",
-                        backgroundColor: "#EF4444",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "6px",
-                        cursor: "pointer",
-                        fontWeight: "500",
-                        fontSize: "0.875rem",
-                      }}
-                    >
-                      Delete
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => handleDeleteProduct(product.id)}
+                    className="flex-1 px-3 py-2 bg-red-500/80 hover:bg-red-600 rounded-lg text-white font-medium shadow-md hover:scale-105 transition"
+                  >
+                    Delete
+                  </button>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
+
+      {/* Animations */}
+      <style>
+        {`
+          @keyframes fadeInSlow {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+          }
+          .animate-fadeInSlow {
+            animation: fadeInSlow 1.2s ease-out forwards;
+          }
+
+          @keyframes slideUp {
+            0% { opacity: 0; transform: translateY(40px); }
+            100% { opacity: 1; transform: translateY(0); }
+          }
+          .animate-slideUp {
+            animation: slideUp 1s ease-out forwards;
+          }
+        `}
+      </style>
     </div>
   );
 }

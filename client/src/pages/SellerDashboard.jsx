@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { formatINR } from "../utils/formatCurrency";
 import { useAuth, useUser, UserButton, SignedIn } from "@clerk/clerk-react";
 import { Link } from "react-router-dom";
 import { useRegisterUser } from "../hooks/useRegisterUser";
@@ -8,10 +9,10 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 export default function SellerDashboard() {
   const { getToken } = useAuth();
   const { user } = useUser();
-  
+
   // Auto-register user as seller if not already registered
   const { isRegistered, error: registrationError } = useRegisterUser("seller");
-  
+
   const [activeTab, setActiveTab] = useState("my-products");
   const [myProducts, setMyProducts] = useState([]);
   const [allProducts, setAllProducts] = useState([]);
@@ -82,8 +83,7 @@ export default function SellerDashboard() {
     const file = e.target.files[0];
     if (file) {
       setMediaFile(file);
-      
-      // Create preview
+
       const reader = new FileReader();
       reader.onloadend = () => {
         setMediaPreview(reader.result);
@@ -100,18 +100,17 @@ export default function SellerDashboard() {
       const url = editingProduct
         ? `${API_URL}/api/seller/products/${editingProduct.id}`
         : `${API_URL}/api/seller/products`;
-      
+
       const method = editingProduct ? "PUT" : "POST";
 
-      // Create FormData for file upload
       const formDataToSend = new FormData();
-      formDataToSend.append('name', formData.name);
-      formDataToSend.append('description', formData.description);
-      formDataToSend.append('price', formData.price);
-      formDataToSend.append('stock', formData.stock || 0);
-      
+      formDataToSend.append("name", formData.name);
+      formDataToSend.append("description", formData.description);
+      formDataToSend.append("price", formData.price);
+      formDataToSend.append("stock", formData.stock || 0);
+
       if (mediaFile) {
-        formDataToSend.append('media', mediaFile);
+        formDataToSend.append("media", mediaFile);
       }
 
       const response = await fetch(url, {
@@ -123,7 +122,7 @@ export default function SellerDashboard() {
       });
 
       const data = await response.json();
-      
+
       if (data.success) {
         alert(editingProduct ? "Product updated!" : "Product created!");
         setFormData({ name: "", description: "", price: "", stock: "" });
@@ -175,50 +174,32 @@ export default function SellerDashboard() {
       stock: product.stock || 0,
     });
     setMediaFile(null);
-    setMediaPreview(product.image_url ? `${API_URL}${product.image_url}` : null);
+    setMediaPreview(
+      product.image_url ? `${API_URL}${product.image_url}` : null
+    );
     setShowAddForm(true);
   };
 
   return (
-    <div style={{ minHeight: "100vh", backgroundColor: "#f5f5f5" }}>
-      {/* Navigation Header */}
-      <header
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 1000,
-          padding: "1rem 2rem",
-          backgroundColor: "white",
-          boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "2rem" }}>
-          <h1 style={{ margin: 0, fontSize: "1.5rem", color: "#4F46E5" }}>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-indigo-900 text-white">
+      {/* NAVBAR */}
+      <header className="fixed top-0 left-0 right-0 z-50 px-6 py-4 bg-white/10 backdrop-blur-xl border-b border-white/20 shadow-lg flex justify-between items-center">
+        <div className="flex items-center gap-6">
+          <h1 className="text-3xl font-bold text-purple-300 drop-shadow-md">
             🏪 Seller Portal
           </h1>
-          <nav style={{ display: "flex", gap: "1rem" }}>
+          <nav className="flex gap-3">
             <Link
               to="/"
-              style={{
-                padding: "0.5rem 1rem",
-                color: "#666",
-                textDecoration: "none",
-                borderRadius: "6px",
-                fontWeight: "500",
-              }}
+              className="px-4 py-2 bg-white/10 rounded-lg hover:bg-white/20 transition"
             >
               Home
             </Link>
           </nav>
         </div>
         <SignedIn>
-          <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-            <span style={{ color: "#666", fontSize: "0.9rem" }}>
+          <div className="flex items-center gap-3">
+            <span className="text-sm opacity-80">
               {user?.primaryEmailAddress?.emailAddress}
             </span>
             <UserButton />
@@ -226,160 +207,152 @@ export default function SellerDashboard() {
         </SignedIn>
       </header>
 
-      {/* Main Content */}
-      <div style={{ padding: "6rem 2rem 2rem 2rem", maxWidth: "1200px", margin: "0 auto" }}>
-        <div style={{ marginBottom: "2rem", textAlign: "center" }}>
-          <h2 style={{ color: "#333", marginBottom: "0.5rem" }}>Seller Dashboard</h2>
-          <p style={{ color: "#666" }}>Welcome, {user?.firstName || "Seller"}!</p>
+      {/* MAIN CONTENT */}
+      <div className="pt-28 px-6 max-w-6xl mx-auto">
+        <div className="text-center mb-8">
+          <h2 className="text-4xl font-bold drop-shadow-md">
+            Seller Dashboard
+          </h2>
+          <p className="opacity-80">Welcome, {user?.firstName || "Seller"}!</p>
         </div>
 
-      {/* Tabs */}
-      <div style={{ display: "flex", gap: "1rem", marginBottom: "2rem", borderBottom: "2px solid #e5e7eb" }}>
-        <button
-          onClick={() => setActiveTab("my-products")}
-          style={{
-            padding: "1rem 2rem",
-            border: "none",
-            background: "none",
-            cursor: "pointer",
-            borderBottom: activeTab === "my-products" ? "3px solid #4F46E5" : "none",
-            color: activeTab === "my-products" ? "#4F46E5" : "#666",
-            fontWeight: activeTab === "my-products" ? "bold" : "normal",
-          }}
-        >
-          My Products
-        </button>
-        <button
-          onClick={() => setActiveTab("all-products")}
-          style={{
-            padding: "1rem 2rem",
-            border: "none",
-            background: "none",
-            cursor: "pointer",
-            borderBottom: activeTab === "all-products" ? "3px solid #4F46E5" : "none",
-            color: activeTab === "all-products" ? "#4F46E5" : "#666",
-            fontWeight: activeTab === "all-products" ? "bold" : "normal",
-          }}
-        >
-          All Products
-        </button>
-      </div>
+        {/* TABS */}
+        <div className="flex gap-4 mb-6 border-b border-white/20">
+          <button
+            onClick={() => setActiveTab("my-products")}
+            className={`pb-3 px-4 text-sm font-semibold transition border-b-2 ${
+              activeTab === "my-products"
+                ? "border-purple-400 text-purple-200"
+                : "border-transparent text-white/60 hover:text-white"
+            }`}
+          >
+            My Products
+          </button>
+          <button
+            onClick={() => setActiveTab("all-products")}
+            className={`pb-3 px-4 text-sm font-semibold transition border-b-2 ${
+              activeTab === "all-products"
+                ? "border-purple-400 text-purple-200"
+                : "border-transparent text-white/60 hover:text-white"
+            }`}
+          >
+            All Products
+          </button>
+        </div>
 
-      {/* My Products Tab */}
-      {activeTab === "my-products" && (
-        <div>
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "1.5rem" }}>
-            <h2>My Products ({myProducts.length})</h2>
-            <button
-              onClick={() => {
-                setShowAddForm(!showAddForm);
-                setEditingProduct(null);
-                setFormData({ name: "", description: "", price: "", stock: "" });
-                setMediaFile(null);
-                setMediaPreview(null);
-              }}
-              style={{
-                padding: "0.75rem 1.5rem",
-                backgroundColor: "#4F46E5",
-                color: "white",
-                border: "none",
-                borderRadius: "6px",
-                cursor: "pointer",
-                fontWeight: "500",
-              }}
-            >
-              {showAddForm ? "Cancel" : "+ Add New Product"}
-            </button>
-          </div>
+        {/* MY PRODUCTS TAB */}
+        {activeTab === "my-products" && (
+          <div className="space-y-6">
+            {/* Header & Add Button */}
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold">
+                My Products ({myProducts.length})
+              </h2>
+              <button
+                onClick={() => {
+                  setShowAddForm(!showAddForm);
+                  setEditingProduct(null);
+                  setFormData({
+                    name: "",
+                    description: "",
+                    price: "",
+                    stock: "",
+                  });
+                  setMediaFile(null);
+                  setMediaPreview(null);
+                }}
+                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg font-semibold shadow-md transition"
+              >
+                {showAddForm ? "Cancel" : "+ Add New Product"}
+              </button>
+            </div>
 
-          {/* Add/Edit Form */}
-          {showAddForm && (
-            <form onSubmit={handleSubmit} style={{ marginBottom: "2rem", padding: "1.5rem", backgroundColor: "#f9fafb", borderRadius: "8px" }}>
-              <h3>{editingProduct ? "Edit Product" : "Add New Product"}</h3>
-              <div style={{ display: "grid", gap: "1rem" }}>
+            {/* Add/Edit Form */}
+            {showAddForm && (
+              <form
+                onSubmit={handleSubmit}
+                className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 shadow-lg space-y-4 animate-fadeInSlow"
+              >
+                <h3 className="text-lg font-semibold mb-2">
+                  {editingProduct ? "Edit Product" : "Add New Product"}
+                </h3>
+
                 <input
                   type="text"
                   placeholder="Product Name *"
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
                   required
-                  style={{ padding: "0.75rem", borderRadius: "6px", border: "1px solid #d1d5db" }}
+                  className="w-full p-3 rounded-lg bg-white/10 border border-white/30 text-white placeholder-white/60"
                 />
+
                 <textarea
                   placeholder="Description"
                   value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, description: e.target.value })
+                  }
                   rows="3"
-                  style={{ padding: "0.75rem", borderRadius: "6px", border: "1px solid #d1d5db" }}
+                  className="w-full p-3 rounded-lg bg-white/10 border border-white/30 text-white placeholder-white/60"
                 />
-                <input
-                  type="number"
-                  step="0.01"
-                  placeholder="Price *"
-                  value={formData.price}
-                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                  required
-                  style={{ padding: "0.75rem", borderRadius: "6px", border: "1px solid #d1d5db" }}
-                />
-                <input
-                  type="number"
-                  placeholder="Stock"
-                  value={formData.stock}
-                  onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-                  style={{ padding: "0.75rem", borderRadius: "6px", border: "1px solid #d1d5db" }}
-                />
-                
-                {/* File Upload Section */}
-                <div style={{ marginTop: "0.5rem" }}>
-                  <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500", color: "#374151" }}>
-                    Product Image/Video
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <input
+                    type="number"
+                    step="0.01"
+                    placeholder="Price *"
+                    value={formData.price}
+                    onChange={(e) =>
+                      setFormData({ ...formData, price: e.target.value })
+                    }
+                    required
+                    className="w-full p-3 rounded-lg bg-white/10 border border-white/30 text-white placeholder-white/60"
+                  />
+                  <input
+                    type="number"
+                    placeholder="Stock"
+                    value={formData.stock}
+                    onChange={(e) =>
+                      setFormData({ ...formData, stock: e.target.value })
+                    }
+                    className="w-full p-3 rounded-lg bg-white/10 border border-white/30 text-white placeholder-white/60"
+                  />
+                </div>
+
+                {/* File Upload */}
+                <div>
+                  <label className="block mb-2 font-medium">
+                    Product Image / Video
                   </label>
                   <input
                     type="file"
                     accept="image/*,video/*"
                     onChange={handleFileChange}
-                    style={{
-                      padding: "0.75rem",
-                      borderRadius: "6px",
-                      border: "2px dashed #d1d5db",
-                      width: "100%",
-                      cursor: "pointer",
-                      backgroundColor: "white"
-                    }}
+                    className="w-full p-3 rounded-lg bg-white/5 border-2 border-dashed border-white/30 cursor-pointer"
                   />
-                  <p style={{ fontSize: "0.75rem", color: "#6b7280", marginTop: "0.25rem" }}>
-                    Accepted: Images (JPEG, PNG, GIF, WebP) and Videos (MP4, MOV, WebM) - Max 10MB
+                  <p className="text-xs opacity-70 mt-1">
+                    Accepted: Images (JPEG, PNG, GIF, WebP) and Videos (MP4,
+                    MOV, WebM) - Max 10MB
                   </p>
                 </div>
 
-                {/* Media Preview */}
+                {/* Preview */}
                 {mediaPreview && (
-                  <div style={{ marginTop: "0.5rem" }}>
-                    <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500", color: "#374151" }}>
-                      Preview
-                    </label>
-                    {mediaFile && mediaFile.type.startsWith('video/') ? (
+                  <div>
+                    <p className="mb-2 font-medium">Preview</p>
+                    {mediaFile && mediaFile.type.startsWith("video/") ? (
                       <video
                         src={mediaPreview}
                         controls
-                        style={{
-                          width: "100%",
-                          maxHeight: "300px",
-                          borderRadius: "6px",
-                          objectFit: "contain",
-                          backgroundColor: "#000"
-                        }}
+                        className="w-full max-h-72 rounded-xl bg-black object-contain"
                       />
                     ) : (
                       <img
                         src={mediaPreview}
                         alt="Preview"
-                        style={{
-                          width: "100%",
-                          maxHeight: "300px",
-                          borderRadius: "6px",
-                          objectFit: "contain"
-                        }}
+                        className="w-full max-h-72 rounded-xl object-contain"
                       />
                     )}
                   </div>
@@ -387,126 +360,142 @@ export default function SellerDashboard() {
 
                 <button
                   type="submit"
-                  style={{
-                    padding: "0.75rem",
-                    backgroundColor: "#10B981",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "6px",
-                    cursor: "pointer",
-                    fontWeight: "500",
-                  }}
+                  className="w-full mt-2 py-3 bg-green-600 hover:bg-green-700 rounded-lg font-semibold shadow-md transition"
                 >
                   {editingProduct ? "Update Product" : "Create Product"}
                 </button>
-              </div>
-            </form>
-          )}
+              </form>
+            )}
 
-          {/* Products Grid */}
-          {loading ? (
-            <p>Loading...</p>
-          ) : myProducts.length === 0 ? (
-            <p style={{ textAlign: "center", color: "#666", padding: "3rem" }}>No products yet. Create your first product!</p>
-          ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "1.5rem" }}>
-              {myProducts.map((product) => (
-                <div key={product.id} style={{ border: "1px solid #e5e7eb", borderRadius: "8px", padding: "1rem", backgroundColor: "white" }}>
-                  {product.image_url && (
-                    product.image_url.match(/\.(mp4|mov|webm|mpeg)$/i) ? (
-                      <video
-                        src={`${API_URL}${product.image_url}`}
-                        controls
-                        style={{ width: "100%", height: "180px", objectFit: "cover", borderRadius: "6px", marginBottom: "1rem", backgroundColor: "#000" }}
-                      />
-                    ) : (
-                      <img
-                        src={`${API_URL}${product.image_url}`}
-                        alt={product.name}
-                        style={{ width: "100%", height: "180px", objectFit: "cover", borderRadius: "6px", marginBottom: "1rem" }}
-                      />
-                    )
-                  )}
-                  <h3 style={{ margin: "0 0 0.5rem 0" }}>{product.name}</h3>
-                  <p style={{ color: "#666", fontSize: "0.9rem", marginBottom: "0.5rem" }}>{product.description}</p>
-                  <p style={{ fontSize: "1.25rem", fontWeight: "bold", color: "#4F46E5", margin: "0.5rem 0" }}>${parseFloat(product.price).toFixed(2)}</p>
-                  <p style={{ fontSize: "0.875rem", color: "#666" }}>Stock: {product.stock}</p>
-                  <div style={{ display: "flex", gap: "0.5rem", marginTop: "1rem" }}>
-                    <button
-                      onClick={() => handleEdit(product)}
-                      style={{
-                        flex: 1,
-                        padding: "0.5rem",
-                        backgroundColor: "#3B82F6",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "4px",
-                        cursor: "pointer",
-                      }}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(product.id)}
-                      style={{
-                        flex: 1,
-                        padding: "0.5rem",
-                        backgroundColor: "#EF4444",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "4px",
-                        cursor: "pointer",
-                      }}
-                    >
-                      Delete
-                    </button>
+            {/* My Products Grid */}
+            {loading ? (
+              <p className="text-center opacity-80">Loading...</p>
+            ) : myProducts.length === 0 ? (
+              <p className="text-center opacity-70 py-10">
+                No products yet. Create your first product!
+              </p>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {myProducts.map((product) => (
+                  <div
+                    key={product.id}
+                    className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-4 shadow-lg transition hover:shadow-purple-400/40 hover:scale-[1.02]"
+                  >
+                    {product.image_url &&
+                      (product.image_url.match(/\.(mp4|mov|webm|mpeg)$/i) ? (
+                        <video
+                          src={`${API_URL}${product.image_url}`}
+                          controls
+                          className="w-full h-44 rounded-xl object-cover mb-3 bg-black"
+                        />
+                      ) : (
+                        <img
+                          src={`${API_URL}${product.image_url}`}
+                          alt={product.name}
+                          className="w-full h-44 rounded-xl object-cover mb-3"
+                        />
+                      ))}
+
+                    <h3 className="text-lg font-semibold mb-1">
+                      {product.name}
+                    </h3>
+                    <p className="text-sm opacity-80 mb-2">
+                      {product.description}
+                    </p>
+                    <p className="text-purple-300 text-xl font-bold mb-1">
+                      {formatINR(product.price)}
+                    </p>
+                    <p className="text-sm opacity-80">Stock: {product.stock}</p>
+
+                    <div className="flex gap-2 mt-4">
+                      <button
+                        onClick={() => handleEdit(product)}
+                        className="flex-1 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg text-sm font-semibold shadow-md transition"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(product.id)}
+                        className="flex-1 py-2 bg-red-500 hover:bg-red-600 rounded-lg text-sm font-semibold shadow-md transition"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
-      {/* All Products Tab */}
-      {activeTab === "all-products" && (
-        <div>
-          <h2>All Products in Marketplace ({allProducts.length})</h2>
-          {loading ? (
-            <p>Loading...</p>
-          ) : allProducts.length === 0 ? (
-            <p style={{ textAlign: "center", color: "#666", padding: "3rem" }}>No products available</p>
-          ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "1.5rem", marginTop: "1.5rem" }}>
-              {allProducts.map((product) => (
-                <div key={product.id} style={{ border: "1px solid #e5e7eb", borderRadius: "8px", padding: "1rem", backgroundColor: "white" }}>
-                  {product.image_url && (
-                    product.image_url.match(/\.(mp4|mov|webm|mpeg)$/i) ? (
-                      <video
-                        src={`${API_URL}${product.image_url}`}
-                        controls
-                        style={{ width: "100%", height: "180px", objectFit: "cover", borderRadius: "6px", marginBottom: "1rem", backgroundColor: "#000" }}
-                      />
-                    ) : (
-                      <img
-                        src={`${API_URL}${product.image_url}`}
-                        alt={product.name}
-                        style={{ width: "100%", height: "180px", objectFit: "cover", borderRadius: "6px", marginBottom: "1rem" }}
-                      />
-                    )
-                  )}
-                  <h3 style={{ margin: "0 0 0.5rem 0" }}>{product.name}</h3>
-                  <p style={{ color: "#666", fontSize: "0.9rem", marginBottom: "0.5rem" }}>{product.description}</p>
-                  <p style={{ fontSize: "1.25rem", fontWeight: "bold", color: "#4F46E5", margin: "0.5rem 0" }}>${parseFloat(product.price).toFixed(2)}</p>
-                  <p style={{ fontSize: "0.875rem", color: "#666" }}>Stock: {product.stock}</p>
-                  <p style={{ fontSize: "0.75rem", color: "#999", marginTop: "0.5rem" }}>Seller ID: {product.seller_id.substring(0, 10)}...</p>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+        {/* ALL PRODUCTS TAB */}
+        {activeTab === "all-products" && (
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold">
+              All Products in Marketplace ({allProducts.length})
+            </h2>
+
+            {loading ? (
+              <p className="text-center opacity-80">Loading...</p>
+            ) : allProducts.length === 0 ? (
+              <p className="text-center opacity-70 py-10">
+                No products available
+              </p>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-2">
+                {allProducts.map((product) => (
+                  <div
+                    key={product.id}
+                    className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-4 shadow-lg transition hover:shadow-purple-400/40 hover:scale-[1.02]"
+                  >
+                    {product.image_url &&
+                      (product.image_url.match(/\.(mp4|mov|webm|mpeg)$/i) ? (
+                        <video
+                          src={`${API_URL}${product.image_url}`}
+                          controls
+                          className="w-full h-44 rounded-xl object-cover mb-3 bg-black"
+                        />
+                      ) : (
+                        <img
+                          src={`${API_URL}${product.image_url}`}
+                          alt={product.name}
+                          className="w-full h-44 rounded-xl object-cover mb-3"
+                        />
+                      ))}
+
+                    <h3 className="text-lg font-semibold mb-1">
+                      {product.name}
+                    </h3>
+                    <p className="text-sm opacity-80 mb-2">
+                      {product.description}
+                    </p>
+                    <p className="text-purple-300 text-xl font-bold mb-1">
+                      {formatINR(product.price)}
+                    </p>
+                    <p className="text-sm opacity-80">Stock: {product.stock}</p>
+                    <p className="text-xs opacity-60 mt-1">
+                      Seller ID: {product.seller_id.substring(0, 10)}...
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
+
+      {/* Simple animation keyframes */}
+      <style>
+        {`
+          @keyframes fadeInSlow {
+            0% { opacity: 0; transform: translateY(15px); }
+            100% { opacity: 1; transform: translateY(0); }
+          }
+          .animate-fadeInSlow {
+            animation: fadeInSlow 0.9s ease-out forwards;
+          }
+        `}
+      </style>
     </div>
   );
 }

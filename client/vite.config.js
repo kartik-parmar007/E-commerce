@@ -1,13 +1,13 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-
+import tailwindcss from "@tailwindcss/vite";
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
   optimizeDeps: {
-    include: ['@clerk/clerk-react'],
+    include: ["@clerk/clerk-react"],
   },
   server: {
     port: 5173,
     strictPort: false,
   },
-})
+});
